@@ -8,3 +8,9 @@ Class {
 	#package : 'ASTSmalltalk',
 	#tag : 'CodeGen'
 }
+
+{ #category : 'accessing' }
+ASCInlinedMethodBlock >> method: aCompiledMethod [
+
+	label := String streamContents: [ :s| s  nextPutAll: label; nextPut: $_;print: aCompiledMethod ]
+]

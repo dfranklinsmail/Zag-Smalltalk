@@ -42,10 +42,12 @@ ASCodeGenerator class >> targetClass: aClass ast: anAST [
 		  generateFrom: anAST
 ]
 
-{ #category : 'instance creation' }
-ASCodeGenerator class >> targetClass: aClass selector: aString [
+{ #category : 'as yet unclassified' }
+ASCodeGenerator class >> targetClass: aClass selector: aSymbol [
 
-	^ self new targetClass: aClass; selector: aString
+	^ self new
+		  targetClass: aClass;
+		  generateFrom: (ASPharoCompiler new astFor: (ASInliner lookup: aSymbol class: aClass) method)
 ]
 
 { #category : 'enumerating' }
@@ -93,7 +95,7 @@ ASCodeGenerator >> basicBlocksUnorderedDo: aBlock [
 { #category : 'API' }
 ASCodeGenerator >> branch: aBasicBlock [
 
-	^ code branch: aBasicBlock
+	^ aBasicBlock ifNotNil: [ code branch: aBasicBlock ]
 ]
 
 { #category : 'API' }
@@ -261,33 +263,49 @@ ASCodeGenerator >> inlineBlock: aString tail: aBoolean [
 	code stack value block zigWalkInlineMethod: self
 ]
 
-{ #category : 'API' }
-ASCodeGenerator >> inlineMethod: aCompileMethod [
-
-	^ self
-		  inlineMethod: aCompileMethod
-		  for: aCompileMethod classBinding value
-]
-
 { #category : 'accessing' }
-ASCodeGenerator >> inlineMethod: aCompileMethod for: inlinedTargetClass [
+ASCodeGenerator >> inlineMethod: aCompiledMethod for: inlinedTargetClass from: anASCSend [
 
-	| inlineBlock savedReturn savedTargetClass |
-	(code isRecursive: aCompileMethod) ifTrue: [ ^ self ].
+	| inlineBlock savedTargetClass |
+	(code isRecursive: aCompiledMethod) ifTrue: [ ^ self ].
 	savedTargetClass := targetClass.
-	"create a new block "
 	inlineBlock := self newInlineMethod.
-	savedReturn := returnBlock.
 	[
 	targetClass := inlinedTargetClass.
-	returnBlock := self newInline.
+	returnBlock := code next ifNil: [
+		               | tempBlock |
+		               tempBlock := self newInline.
+		               tempBlock addSourceBlock: code.
+		               tempBlock returnTop.
+		               tempBlock ].
+	code removeLastOperation.
 	self branch: inlineBlock.
 	code := inlineBlock.
-	(ASPharoCompiler new astFor: aCompileMethod) zigWalkInlineMethod:
+	code method: aCompiledMethod. 
+	self halt.
+	(ASPharoCompiler new astFor: aCompiledMethod) zigWalkInlineMethod:
 		self ] ensure: [ "when you hit a return while walking the method you need to not do returnTop you need to return to returnBlock""self can hold the return block"
 		code := returnBlock.
-		returnBlock := savedReturn.
 		targetClass := savedTargetClass ]
+]
+
+{ #category : 'inlining' }
+ASCodeGenerator >> inlineMultiple: aCollection from: anASCSend exhaustive: isExhaustive [
+
+	| case |
+	isExhaustive ifTrue: [ code removeLastOperation ].
+	case := code
+		        classCase: (aCollection collect: #methodClass)
+		        selector: aCollection first selector.
+	isExhaustive ifFalse: [ code swapLastOperations ].
+	^ aCollection do: [ :compiledMethod |
+		  | targetBlock |
+		  targetBlock := case at: compiledMethod methodClass.
+		  basicBlocks add: targetBlock.
+		  self setBasicBlock: targetBlock.
+		  "walk the sends method AST"
+		  self inlineMethod: compiledMethod for: targetBlock from: anASCSend.
+		  self branch: anASCSend next ]
 ]
 
 { #category : 'data flow instructions' }
@@ -453,30 +471,31 @@ ASCodeGenerator >> pushVariable: variable [
 	^ code pushVariable: variable
 ]
 
-{ #category : 'as yet unclassified' }
-ASCodeGenerator >> requireContext [
+{ #category : 'examples' }
+ASCodeGenerator >> returnLiteral: literal [
 
-	code getContext
+	code returnLiteral: literal.
+	self branch: returnBlock.
+	^ true
 ]
 
 { #category : 'API' }
 ASCodeGenerator >> returnSelf [
 
-	code returnSelf
+	^ code returnSelf
 ]
 
 { #category : 'API' }
 ASCodeGenerator >> returnTop [
 
-	code
-		returnTop
+	^ code returnTop
 ]
 
 { #category : 'API' }
 ASCodeGenerator >> returnTopInline [
 
 	code popAndCopyTopToSelf.
-	self branch: returnBlock
+	^ self branch: returnBlock
 ]
 
 { #category : 'accessing' }
@@ -532,37 +551,6 @@ ASCodeGenerator >> sendEmbedded: aSymbol [
 	^ bb ifNotNil: [
 		  basicBlocks add: bb.
 		  code := bb ]
-]
-
-{ #category : 'API' }
-ASCodeGenerator >> sendInline: aSymbol targetClass: aTargetClass tail: tail [
-
-	| symbolImplementors common targets |
-	"check if we're recursive"
-	inline ifFalse: [ ^ false ].
-
-	"check if this is a self call"
-	targetClass == aTargetClass ifTrue: [
-		self inlineMethod: aTargetClass >> aSymbol.
-		^ true ].
-	"extract system nav and for now base if off a list"
-	symbolImplementors := #()"self implementors: aSymbol".
-	"move to 'ensure' to remove last"
-	(symbolImplementors size between: 1 and: 4) ifFalse: [ ^ false ].
-	common := self newInline.
-	tail ifTrue: [ common returnTop ].
-	ASTBlockClosure == aTargetClass ifTrue: [
-		^ self inlineBlock: aSymbol next: common ].
-	[
-	targets := self
-		           classCase: (symbolImplementors collect: #methodClass)
-		           selector: aSymbol.
-	targets with: symbolImplementors do: [ :target :compileMethod |
-		self setBasicBlock: target.
-		"walk the sends method AST"
-		self inlineMethod: compileMethod for: target.
-		self branch: common ] ] ensure: [ self setBasicBlock: common ].
-	^ true
 ]
 
 { #category : 'accessing' }

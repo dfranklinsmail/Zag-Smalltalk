@@ -5,7 +5,6 @@ Class {
 	#name : 'ASCSend',
 	#superclass : 'ASCEmbed',
 	#instVars : [
-		'useCall',
 		'bb',
 		'target'
 	],
@@ -14,19 +13,11 @@ Class {
 	#tag : 'CodeGen'
 }
 
-{ #category : 'initialization' }
-ASCSend >> initialize [ 
-
-super initialize .	useCall := false
-]
-
 { #category : 'inlining' }
 ASCSend >> inlineIfPossible: anASCodeGenerator [
 
-	| inliner |
-	inliner := ASInliner lookup: selector stack: stack.
-	inliner ifNil: [ ^ self ].
-	^ inliner 
+	(ASInliner lookup: selector stack: stack) ifNotNil: [ : inliner | ^ inliner inline: self with: anASCodeGenerator ].
+	self halt
 ]
 
 { #category : 'printing' }
@@ -50,6 +41,12 @@ ASCSend >> isCallOperation [
 { #category : 'accessing' }
 ASCSend >> isSend [
 	^ true
+]
+
+{ #category : 'testing' }
+ASCSend >> isTailcall [
+
+	^ bb isNil
 ]
 
 { #category : 'block handling' }
@@ -103,9 +100,4 @@ ASCSend >> target [
 { #category : 'accessing' }
 ASCSend >> target: aSymbol [
 	target := aSymbol
-]
-
-{ #category : 'accessing' }
-ASCSend >> useCall [
-	useCall := true
 ]
