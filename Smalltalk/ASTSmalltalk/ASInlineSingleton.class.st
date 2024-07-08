@@ -14,6 +14,12 @@ Class {
 	#tag : 'Inlining'
 }
 
+{ #category : 'initialization' }
+ASInlineSingleton class >> method: aCompiledMethod class: aClass [
+
+	^ (aCompiledMethod isPrimitive ifTrue: [ ASInlinePrimitive ] ifFalse: [ self ]) new method: aCompiledMethod class: aClass
+]
+
 { #category : 'inlining' }
 ASInlineSingleton >> inline: anASCSend with: anASCodeGenerator [
 
@@ -33,4 +39,10 @@ ASInlineSingleton >> method: aCompiledMethod class: aClass [
 
 	method := aCompiledMethod.
 	targetClass := aClass
+]
+
+{ #category : 'testing' }
+ASInlineSingleton >> validate: aStackElement [
+
+	^ self
 ]

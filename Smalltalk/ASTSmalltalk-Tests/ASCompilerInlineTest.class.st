@@ -457,9 +457,6 @@ ASCompilerInlineTest >> testFoo1Inlined [
 		      targetClass: ASCompileTestClass1
 		      selector: #foo1.
 	cg
-		inspect;
-		halt.
-	cg
 		inline: true;
 		finalAnalysis;
 		inspect
@@ -474,10 +471,9 @@ ASCompilerInlineTest >> testFoo2Inlined [
 	^ 42"
 
 	| cg |
-	cg := ASCodeGenerator targetClass: ASCompileTestClass1 selector: #foo2.
-	cg
-		inspect;
-		halt.
+	cg := ASCodeGenerator
+		      targetClass: ASCompileTestClass1
+		      selector: #foo2.
 	cg
 		inline: true;
 		finalAnalysis;
@@ -497,9 +493,6 @@ ASCompilerInlineTest >> testFoo3Inlined [
 		      targetClass: ASCompileTestClass1
 		      selector: #foo3.
 	cg
-		inspect;
-		halt.
-	cg
 		inline: true;
 		finalAnalysis;
 		inspect
@@ -516,9 +509,6 @@ ASCompilerInlineTest >> testFooInlined [
 
 	| cg |
 	cg := ASCodeGenerator targetClass: ASCompileTestClass1 selector: #foo.
-	cg
-		inspect;
-		halt.
 	cg
 		inline: true;
 		finalAnalysis;
@@ -558,7 +548,15 @@ ASCompilerInlineTest >> testInlinePlus1Inlined [
 	"plus1: aNumber
 	^ aNumber + 1"
 
-	(ASNoOutput withInlining compileMethod: ASCompileTestClass1 >> #inlinePlus1) inspect
+	| cg |
+	cg := ASCodeGenerator
+		      targetClass: ASCompileTestClass1
+		      selector: #inlinePlus1.
+	cg inspect;halt.
+	cg
+		inline: true;
+		finalAnalysis;
+		inspect
 ]
 
 { #category : 'tests' }
@@ -573,12 +571,33 @@ ASCompilerInlineTest >> testInsertionSort [
 ]
 
 { #category : 'tests' }
+ASCompilerInlineTest >> testNegatedInlined [
+	"inlinePlus1
+	^ self plus1: 30"
+
+	"plus1: aNumber
+	^ aNumber + 1"
+
+	| cg |
+	cg := ASCodeGenerator targetClass: SmallInteger selector: #negated.
+	cg
+		inline: true;
+		finalAnalysis;
+		inspect
+]
+
+{ #category : 'tests' }
 ASCompilerInlineTest >> testRecursiveMethod [
 	"recursiveMethod
 	^ recursiveMethod"
 
-		(ASNoOutput withInlining compileMethod:
-		 ASCompileTestClass1 >> #recursiveMethod) inspect
+	| cg |
+	cg := ASCodeGenerator targetClass: ASCompileTestClass1 selector: #recursiveMethod.
+	cg inspect;halt.
+	cg
+		inline: true;
+		finalAnalysis;
+		inspect
 ]
 
 { #category : 'tests' }
