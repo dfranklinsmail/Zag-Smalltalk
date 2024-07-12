@@ -11,6 +11,12 @@ Class {
 	#tag : 'Stack'
 }
 
+{ #category : 'displaying' }
+ASStackContext >> displayStringOn: stream [
+
+	self printNameOn: stream
+]
+
 { #category : 'enumerating' }
 ASStackContext >> do: aBlock [
 
@@ -44,6 +50,12 @@ ASStackContext >> newElementFor: aBasicBlock [
 ASStackContext >> offset [
 
 	^ 0
+]
+
+{ #category : 'displaying' }
+ASStackContext >> printNameOn: stream [
+
+	stream nextPutAll: '<context>'
 ]
 
 { #category : 'initialization' }
