@@ -15,8 +15,15 @@ ASFlowOnDemand >> getNameFor: aStackElement on: anOutput [
 	^ outputName ifNil: [ outputName := anOutput loadFromStack: aStackElement ]
 ]
 
+{ #category : 'testing' }
+ASFlowOnDemand >> needsToBeSpilled [
+
+	^ false
+]
+
 { #category : 'printing' }
 ASFlowOnDemand >> printOn: aStream [
 
-	^ aStream nextPutAll: 'on demand'
+	aStream nextPutAll: 'on demand'.
+	^ self printClassOn: aStream
 ]

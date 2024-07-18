@@ -12,22 +12,41 @@ Class {
 	#tag : 'CodeGen'
 }
 
+{ #category : 'adding' }
+ASCReturnBlock >> addSourceBlock: aBasicBlock [
+
+	sourceBlocks add: aBasicBlock andIfNewDo: [
+		sourceElements
+			ifNil: [
+			sourceElements := self copyStackFrom: aBasicBlock ]
+			ifNotNil: [
+				sourceElements
+					with: aBasicBlock stack
+					do: [ :stackElement :other | stackElement mergeWith: other ] ] ]
+]
+
 { #category : 'data flow instructions' }
-ASCReturnBlock >> classForLocals [
+ASCReturnBlock >> flowForLocals [
 
 	^ ASFlowOnDemand
 ]
 
 { #category : 'data flow instructions' }
-ASCReturnBlock >> classForTemporaries [
+ASCReturnBlock >> flowForParameters [
 
 	^ ASFlowOnDemand
 ]
 
-{ #category : 'accessing' }
-ASCReturnBlock >> context: anASStackContext [ 
+{ #category : 'data flow instructions' }
+ASCReturnBlock >> flowForSelf [
 
-	context := anASStackContext
+	^ ASFlowOnDemand
+]
+
+{ #category : 'data flow instructions' }
+ASCReturnBlock >> flowForTemporaries [
+
+	^ ASFlowOnDemand
 ]
 
 { #category : 'testing' }

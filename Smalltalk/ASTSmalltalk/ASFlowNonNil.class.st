@@ -41,7 +41,7 @@ ASFlowNonNil >> dataClass [
 { #category : 'accessing' }
 ASFlowNonNil >> from: aFlow [
 
-	value := aFlow.
+	value := aFlow value.
 	self class: aFlow dataClass
 ]
 
@@ -85,6 +85,17 @@ ASFlowNonNil >> needsToBeSpilled [
 ]
 
 { #category : 'printing' }
+ASFlowNonNil >> printClassOn: aStream [
+
+	class ifNotNil: [
+		aStream
+		space;
+		nextPut: $(;
+		print: class;
+		nextPut: $) ]
+]
+
+{ #category : 'printing' }
 ASFlowNonNil >> printOn: aStream [
 
 	^ self subclassResponsibility
@@ -93,7 +104,7 @@ ASFlowNonNil >> printOn: aStream [
 { #category : 'output' }
 ASFlowNonNil >> pushFromContext: anInteger with: anASLLMethodOutput [ 
 
-	^ anASLLMethodOutput emitPushFromContext: anInteger
+	^ anASLLMethodOutput emitPushFromContext: anInteger flow: self
 ]
 
 { #category : 'accessing' }

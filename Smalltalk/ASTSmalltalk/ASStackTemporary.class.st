@@ -29,7 +29,7 @@ ASStackTemporary >> displayStringOn: stream [
 	stream
 		nextPutAll: ' (';
 		print: offset;
-		nextPutAll: ' >';
+		nextPutAll: ') >';
 		print: data
 ]
 
@@ -45,22 +45,10 @@ ASStackTemporary >> drop: count [
 	^ next drop: count-1
 ]
 
-{ #category : 'rewriting' }
-ASStackTemporary >> dropUnder: n [
-
-	^ self replicate: (next drop: n)
-]
-
 { #category : 'accessing' }
 ASStackTemporary >> id [
 
 	^ offset
-]
-
-{ #category : 'API' }
-ASStackTemporary >> makeContextRequired: aBlock [
-
-	^ self replicate: (next makeContextRequired: aBlock)
 ]
 
 { #category : 'as yet unclassified' }
@@ -108,9 +96,14 @@ ASStackTemporary >> nameStack: parameterNamesLeftToRight offset: anInteger forBl
 { #category : 'data flow instructions' }
 ASStackTemporary >> newElementFor: aBasicBlock [
 
-	| new |
-	new := aBasicBlock classForTemporaries new.
-	^ (self replicate: (next newElementFor: aBasicBlock)) data: new
+	^ (self replicate: (next newElementFor: aBasicBlock)) data:
+		  (aBasicBlock flowForTemporaries new basicBlock: aBasicBlock)
+]
+
+{ #category : 'displaying' }
+ASStackTemporary >> printNameOn: stream [
+
+	stream nextPutAll: 'temp'
 ]
 
 { #category : 'initialization' }

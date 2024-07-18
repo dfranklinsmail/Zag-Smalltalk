@@ -21,6 +21,26 @@ ASStack >> add: newObject [
 	^ self shouldNotImplement
 ]
 
+{ #category : 'enumerating' }
+ASStack >> addToCollection: aCollection [
+
+	^ aCollection
+
+	
+]
+
+{ #category : 'inspecting' }
+ASStack >> asOrderedCollection [
+
+	^ self addToCollection: OrderedCollection new
+]
+
+{ #category : 'copying' }
+ASStack >> copyFor: aBasicBlock [ 
+
+	^ self newElementFor: aBasicBlock
+]
+
 { #category : 'displaying' }
 ASStack >> displayStringOn: stream [
 	self printNameOn: stream.
@@ -46,7 +66,7 @@ ASStack >> hasContext [
 { #category : 'API' }
 ASStack >> initLocalNamed: name [
 
-	^ (ASLocalNamed new fromStack: self) name: name; data: ASFlowNil new
+	^ (ASLocalNamed new fromStack: self) name: name
 ]
 
 { #category : 'API' }
@@ -102,6 +122,12 @@ ASStack >> offset [
 	^ 0
 ]
 
+{ #category : 'displaying' }
+ASStack >> printNameOn: stream [
+
+	self subclassResponsibility
+]
+
 { #category : 'printing' }
 ASStack >> printOn: aStream [
 
@@ -124,6 +150,11 @@ ASStack >> pushForTests: anObject [
 ASStack >> remove: oldObject ifAbsent: anExceptionBlock [
 
 	^ self shouldNotImplement
+]
+
+{ #category : 'stack' }
+ASStack >> replicate [
+
 ]
 
 { #category : 'data flow instructions' }

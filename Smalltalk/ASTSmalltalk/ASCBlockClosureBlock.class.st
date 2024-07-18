@@ -19,29 +19,28 @@ Class {
 { #category : 'adding' }
 ASCBlockClosureBlock >> addBlock: anASCReturnBlock [
 
-self halt.
-	anASCReturnBlock context: self getContext.
+	self halt.
 	^ returnBlocks
 		  at: anASCReturnBlock
 		  ifAbsentPut: [ returnBlocks size + 1 ]
-]
-
-{ #category : 'data flow instructions' }
-ASCBlockClosureBlock >> classForLocals [
-
-	^ ASFlowNil
-]
-
-{ #category : 'data flow instructions' }
-ASCBlockClosureBlock >> classForTemporaries [
-
-	^ self shouldNotImplement
 ]
 
 { #category : 'accessing' }
 ASCBlockClosureBlock >> context [
 
 	^ context
+]
+
+{ #category : 'data flow instructions' }
+ASCBlockClosureBlock >> flowForLocals [
+
+	^ ASFlowNil
+]
+
+{ #category : 'data flow instructions' }
+ASCBlockClosureBlock >> flowForTemporaries [
+
+	^ self shouldNotImplement
 ]
 
 { #category : 'testing' }
@@ -51,16 +50,20 @@ ASCBlockClosureBlock >> hasContextOnEntry [
 ]
 
 { #category : 'API' }
+ASCBlockClosureBlock >> initContext [
+
+	stack := ASStackContext fromStack: stack.
+	stack data: (context := ASFlowContext new)
+
+]
+
+{ #category : 'API' }
 ASCBlockClosureBlock >> initParameterNamed: aSymbol [
 
 	| source |
 	stack := stack initParameterNamed: aSymbol.
-	source := (ASFlowParameter value: (ASCParameter new
-				   init: Object;
-				   name: aSymbol)) class: nil.
-	^ stack
-		  
-		  data: source
+	source := ASFlowParameter new.
+	^ stack data: source
 ]
 
 { #category : 'API' }
@@ -68,9 +71,7 @@ ASCBlockClosureBlock >> initSelf: targetClass [
 
 	| source |
 	stack := stack initSelf.
-	source := (ASFlowParameter value: (ASCSelf new
-			            init: targetClass;
-			            name: #self)) class: targetClass.
+	source := ASFlowParameter new class: targetClass.
 	^ stack data: source
 ]
 

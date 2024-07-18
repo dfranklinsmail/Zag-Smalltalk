@@ -6,10 +6,19 @@ I may,  or may not be reified in a particular method
 Class {
 	#name : 'ASStackContext',
 	#superclass : 'ASStackNonEmpty',
+	#instVars : [
+		'uses'
+	],
 	#category : 'ASTSmalltalk-Stack',
 	#package : 'ASTSmalltalk',
 	#tag : 'Stack'
 }
+
+{ #category : 'displaying' }
+ASStackContext >> displayStringOn: stream [
+
+	self printNameOn: stream
+]
 
 { #category : 'enumerating' }
 ASStackContext >> do: aBlock [
@@ -30,11 +39,6 @@ ASStackContext >> hasContext [
 	^ true
 ]
 
-{ #category : 'API' }
-ASStackContext >> makeContextRequired: aFullBlockClosure [ 
-
-]
-
 { #category : 'data flow instructions' }
 ASStackContext >> newElementFor: aBasicBlock [
 	^ self class new fromStack: (next newElementFor: aBasicBlock)
@@ -44,6 +48,12 @@ ASStackContext >> newElementFor: aBasicBlock [
 ASStackContext >> offset [
 
 	^ 0
+]
+
+{ #category : 'displaying' }
+ASStackContext >> printNameOn: stream [
+
+	stream nextPutAll: '<context>'
 ]
 
 { #category : 'initialization' }
