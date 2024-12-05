@@ -17,17 +17,17 @@ ASRemoveUnusedBlockClsuresOptimizationTest >> setUp [
 	"Put here a common initialization logic for tests"
 	ASInliner reset.
 	cgNoInline := (ASCodeGenerator
-		      targetClass: ASCompileTestClass1
-		      selector: #blockReturnEasy)
-				inline: false;
-				removeUnusedBlockClosures.
-	
+		               targetClass: ASCompileTestClass1
+		               selector: #fooBarBlock)
+		              inline: false;
+		              finalAnalysis.
+
 	ASInliner reset.
 	cgInline := (ASCodeGenerator
-		      targetClass: ASCompileTestClass1
-		      selector: #blockReturnEasy)
-				inline: true; 
-				removeUnusedBlockClosures.
+		             targetClass: ASCompileTestClass1
+		             selector: #fooBarBlock)
+		            inline: true;
+		            finalAnalysis
 ]
 
 { #category : 'tests' }
